@@ -1,0 +1,8 @@
+FROM python:3.11-slim
+WORKDIR /app
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+COPY barchart_swing_bot ./barchart_swing_bot
+COPY pyproject.toml .
+ENV PYTHONPATH=/app
+CMD ["uvicorn", "barchart_swing_bot.main:app", "--host", "0.0.0.0", "--port", "8000"]
