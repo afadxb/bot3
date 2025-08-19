@@ -4,7 +4,7 @@ from sqlalchemy.orm import Session
 from .config import get_settings
 from .db import Base, engine, get_db
 from .models import Setting
-from . import scheduler
+from . import scheduler, notifier
 
 settings = get_settings()
 app = FastAPI(title="barchart-swing-bot")
@@ -46,6 +46,8 @@ def set_setting(key: str, value: str, db: Session = Depends(get_db)) -> dict[str
         row = Setting(key=key, value=value)
         db.add(row)
     db.commit()
+    if key == "kill_switch":
+        notifier.send("kill-switch toggled", value)
     return {"key": key, "value": value}
 
 
@@ -54,3 +56,9 @@ def run_job(job_id: str) -> dict[str, str]:
     if not scheduler.run_job_now(job_id):
         raise HTTPException(status_code=404, detail="job not found")
     return {"status": "queued"}
+
+
+@app.post("/pushover/test", dependencies=[Depends(auth)])
+def pushover_test() -> dict[str, str]:
+    notifier.send("test", "integration test")
+    return {"status": "sent"}
