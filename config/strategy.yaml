@@ -1,0 +1,68 @@
+# Parameter tips (5-min bars)
+# Start with ATR period 10–14, multiplier 2.5–3.0.
+# If you trade tight movers or pre-market: decrease mult slightly (2.3–2.6).
+# For mega-caps/quiet sessions: increase mult (3.2–3.5) to avoid noise.
+# Consider adaptive mult: map ATR percentile (last 20 bars) to 2.4–3.2.
+
+orchestrator:
+  timezone: America/Toronto
+  cadence_min: 5
+  intraday_top_n: 20
+  flatten_time_et: "15:55"
+  drawdown_halt_pct: 10
+  start_with_dry_run: false
+
+risk:
+  enable_limits: true
+  risk_per_trade_pct: 1.0
+  daily_trade_cap: 20
+  daily_drawdown_halt_pct: 10.0
+  min_tick_buffer: 0.01
+  max_position_value_pct: 20.0
+  max_portfolio_exposure_pct: 100
+  earnings_blackout: true
+  earnings_blackout_mode: cap
+  spread_penalty_bp: 50
+  illiquidity_veto: true
+
+execution:
+  enable_orders: true
+  scale_out_at_r_multiple: 1.0
+  final_target_r_multiple: 2.0
+  trail_mode: ema21
+  # Trailing stop and limit offset per hybrid exit logic
+  atr_trail_mult: 2.0     # Trailing stop = 2 x ATR
+  lmt_offset_pct: 0.02    # Trail limit offset = 2%
+
+strategy:
+  ema_fast: 9
+  ema_slow: 21
+  ema_bias: 50
+  vwap_required: true
+  vol_spike_multiple: 1.5
+  consolidation_lookback: 20
+  catalyst_required: true
+  # Hybrid direction model controls
+  enable_supertrend: true        # Primary direction gate
+  ema_trigger_lookback: 2        # EMA cross lookback bars for trigger/boost
+  require_bias_alignment: true   # Keep EMA bias alignment check
+  require_vwap_alignment: true   # Keep VWAP alignment check
+  supertrend:
+    atr_period: 10
+    atr_mult: 3
+
+ai:
+  enable_gating: true
+  finbert:
+    enable: true
+    min_headlines: 1
+    decay_hours: 12
+
+feeds:
+  ibkr:
+    enable: true
+    throttle_rps: 2
+  finnhub:
+    enable: true
+  yahoo_rss:
+    enable: true
